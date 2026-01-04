@@ -54,7 +54,7 @@ npm run dev       # Start Vite dev server + Electron
 npm run typecheck # Type check the code
 ```
 
-## �� Building & Deployment
+##  Building & Deployment
 
 ### Development Build
 
