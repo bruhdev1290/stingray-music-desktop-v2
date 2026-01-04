@@ -13,7 +13,7 @@ export const useBranding = () => {
 
   const hasCustomBranding = !isKoelBirdLogo(currentBranding.logo)
     || !isKoelBirdCover(currentBranding.cover)
-    || currentBranding.name !== 'Koel'
+    || currentBranding.name !== 'Stingray Music'
 
   return {
     currentBranding,

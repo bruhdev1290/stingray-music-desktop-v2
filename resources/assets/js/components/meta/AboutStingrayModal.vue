@@ -2,7 +2,7 @@
   <div
     v-koel-focus
     class="about text-center max-w-[480px] overflow-hidden relative"
-    data-testid="about-koel"
+    data-testid="about-stingray"
     tabindex="0"
     @keydown.esc="close"
   >
@@ -37,19 +37,14 @@
       </p>
 
       <p v-if="!hasCustomBranding" class="author">
-        Made with ❤️ by
-        <a href="https://github.com/phanan" rel="noopener" target="_blank">Phan An</a>
-        and quite a few awesome
-        <a href="https://github.com/koel/koel/graphs/contributors" rel="noopener" target="_blank">contributors</a>.
+        Stingray Music Desktop Client
       </p>
 
       <CreditsBlock v-if="isDemo" />
 
       <p v-if="!isPlus">
-        Loving Koel? Please consider supporting its development via
-        <a href="https://github.com/users/phanan/sponsorship" rel="noopener" target="_blank">GitHub Sponsors</a>
-        and/or
-        <a href="https://opencollective.com/koel" rel="noopener" target="_blank">OpenCollective</a>.
+        For more information, visit
+        <a href="https://github.com/bruhdev1290/stingray-music-desktop-v2" rel="noopener" target="_blank">the project page</a>.
       </p>
     </main>
 

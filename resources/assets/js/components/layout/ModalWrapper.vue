@@ -21,7 +21,7 @@ import { eventBus } from '@/utils/eventBus'
 import type { Modals } from '@/config/modals'
 
 const modalNameToComponentMap: Record<keyof Modals, Closure> = {
-  ABOUT_KOEL: defineAsyncComponent(() => import('@/components/meta/AboutKoelModal.vue')),
+  ABOUT_KOEL: defineAsyncComponent(() => import('@/components/meta/AboutStingrayModal.vue')),
   ADD_PODCAST_FORM: defineAsyncComponent(() => import('@/components/podcast/AddPodcastForm.vue')),
   ADD_RADIO_STATION_FORM: defineAsyncComponent(() => import('@/components/radio/AddRadioStationForm.vue')),
   ADD_USER_FORM: defineAsyncComponent(() => import('@/components/user/AddUserForm.vue')),

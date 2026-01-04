@@ -2,9 +2,9 @@ import { screen } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 import { createHarness } from '@/__tests__/TestHarness'
 import { commonStore } from '@/stores/commonStore'
-import Component from './AboutKoelButton.vue'
+import Component from './AboutStingrayButton.vue'
 
-describe('aboutKoelButton.vue', () => {
+describe('aboutStingrayButton.vue', () => {
   const h = createHarness()
 
   it('shows no notification when no new available available', () => {
@@ -14,7 +14,7 @@ describe('aboutKoelButton.vue', () => {
     h.actingAsAdmin().render(Component)
     expect(screen.queryByTitle('New version available!')).toBeNull()
     expect(screen.queryByTestId('new-version-indicator')).toBeNull()
-    screen.getByTitle('About Koel')
+    screen.getByTitle('About Stingray Music')
   })
 
   it('shows notification when new version available', () => {
@@ -33,6 +33,6 @@ describe('aboutKoelButton.vue', () => {
     h.actingAsUser().render(Component)
     expect(screen.queryByTitle('New version available!')).toBeNull()
     expect(screen.queryByTestId('new-version-indicator')).toBeNull()
-    screen.getByTitle('About Koel')
+    screen.getByTitle('About Stingray Music')
   })
 })
