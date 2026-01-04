@@ -39,12 +39,6 @@ interface StingrayTrack {
   streamUrl?: string
 }
 
-interface StingraySearchResult {
-  stations?: StingrayStation[]
-  tracks?: StingrayTrack[]
-  playlists?: StingrayPlaylist[]
-}
-
 class StingrayMusicService {
   private config: StingrayConfig = {
     enabled: false,
@@ -120,8 +114,24 @@ class StingrayMusicService {
 
   /**
    * Search for content in Stingray Music catalog
+   * Returns different types based on the search type parameter
    */
-  async search (query: string, _type: 'stations' | 'tracks' | 'playlists' = 'tracks'): Promise<StingrayStation[] | StingrayTrack[] | StingrayPlaylist[]> {
+  async search (
+    query: string,
+    type: 'stations'
+  ): Promise<StingrayStation[]>
+  async search (
+    query: string,
+    type: 'tracks'
+  ): Promise<StingrayTrack[]>
+  async search (
+    query: string,
+    type: 'playlists'
+  ): Promise<StingrayPlaylist[]>
+  async search (
+    query: string,
+    _type: 'stations' | 'tracks' | 'playlists' = 'tracks',
+  ): Promise<StingrayStation[] | StingrayTrack[] | StingrayPlaylist[]> {
     if (!this.isEnabled() || !query.trim()) {
       return []
     }
@@ -174,4 +184,4 @@ class StingrayMusicService {
 }
 
 export const stingrayMusicService = new StingrayMusicService()
-export type { StingrayConfig, StingrayPlaylist, StingraySearchResult, StingrayStation, StingrayTrack }
+export type { StingrayConfig, StingrayPlaylist, StingrayStation, StingrayTrack }
