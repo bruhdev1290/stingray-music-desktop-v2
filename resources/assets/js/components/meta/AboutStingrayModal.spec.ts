@@ -3,9 +3,9 @@ import { screen, waitFor } from '@testing-library/vue'
 import { createHarness } from '@/__tests__/TestHarness'
 import { commonStore } from '@/stores/commonStore'
 import { http } from '@/services/http'
-import Component from './AboutKoelModal.vue'
+import Component from './AboutStingrayModal.vue'
 
-describe('aboutKoelModal.vue', () => {
+describe('aboutStingrayModal.vue', () => {
   const h = createHarness()
 
   const renderComponent = () => {

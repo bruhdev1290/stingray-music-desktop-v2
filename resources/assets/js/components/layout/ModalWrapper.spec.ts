@@ -13,7 +13,7 @@ describe('modalWrapper.vue', () => {
     keyof Events,
       User | MaybeArray<Streamable> | Playlist | PlaylistFolder | Artist | Album | undefined,
   ]>([
-    ['about-koel', 'MODAL_SHOW_ABOUT_KOEL', undefined],
+    ['about-stingray', 'MODAL_SHOW_ABOUT_KOEL', undefined],
     ['add-podcast-form', 'MODAL_SHOW_ADD_PODCAST_FORM', undefined],
     ['add-radio-station-form', 'MODAL_SHOW_ADD_RADIO_STATION_FORM', undefined],
     ['add-user-form', 'MODAL_SHOW_ADD_USER_FORM', undefined],
@@ -37,7 +37,7 @@ describe('modalWrapper.vue', () => {
     h.render(Component, {
       global: {
         stubs: {
-          AboutKoelModal: h.stub('about-koel'),
+          AboutStingrayModal: h.stub('about-stingray'),
           AddPodcastForm: h.stub('add-podcast-form'),
           AddRadioStationForm: h.stub('add-radio-station-form'),
           AddUserForm: h.stub('add-user-form'),

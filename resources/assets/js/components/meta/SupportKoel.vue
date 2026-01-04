@@ -5,10 +5,8 @@
     data-testid="support-bar"
   >
     <p class="flex-1">
-      Loving Koel? Please consider supporting its development via
-      <a href="https://github.com/users/phanan/sponsorship" rel="noopener" target="_blank">GitHub Sponsors</a>
-      and/or
-      <a href="https://opencollective.com/koel" rel="noopener" target="_blank">OpenCollective</a>.
+      Enjoying Stingray Music? For more information, visit
+      <a href="https://github.com/bruhdev1290/stingray-music-desktop-v2" rel="noopener" target="_blank">the project page</a>.
     </p>
     <button type="button" @click.prevent="close">Hide</button>
     <span class="block after:content-['•'] after:block" />

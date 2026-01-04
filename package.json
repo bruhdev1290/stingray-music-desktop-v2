@@ -1,17 +1,19 @@
 {
-  "name": "koel",
-  "author": "Phan An <me@phanan.net>",
-  "homepage": "https://koel.dev",
+  "name": "stingray-music-client",
+  "author": "bruhdev1290",
+  "homepage": "https://github.com/bruhdev1290/stingray-music-desktop-v2",
   "license": "MIT",
-  "description": "A personal music streaming server that works",
+  "description": "Stingray Music Desktop Client - A desktop music streaming application",
   "keywords": [
     "music",
     "audio",
-    "stream"
+    "stream",
+    "stingray",
+    "desktop"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/koel/koel"
+    "url": "https://github.com/bruhdev1290/stingray-music-desktop-v2"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.7.2",

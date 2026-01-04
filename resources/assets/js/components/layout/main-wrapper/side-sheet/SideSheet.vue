@@ -17,7 +17,7 @@
       </div>
 
       <div class="btn-group">
-        <AboutKoelButton />
+        <AboutStingrayButton />
         <LogoutButton />
         <ProfileAvatar @click="onProfileLinkClick" />
       </div>
@@ -83,7 +83,7 @@ import { defineAsyncComponent, requireInjection } from '@/utils/helpers'
 import { CurrentStreamableKey } from '@/symbols'
 
 import ProfileAvatar from '@/components/ui/ProfileAvatar.vue'
-import AboutKoelButton from '@/components/layout/main-wrapper/side-sheet/AboutKoelButton.vue'
+import AboutStingrayButton from '@/components/layout/main-wrapper/side-sheet/AboutStingrayButton.vue'
 import LogoutButton from '@/components/layout/main-wrapper/side-sheet/LogoutButton.vue'
 import SideSheetButton from '@/components/layout/main-wrapper/side-sheet/SideSheetButton.vue'
 import SideSheetPanelLazyWrapper from '@/components/layout/main-wrapper/side-sheet/SideSheetPanelLazyWrapper.vue'

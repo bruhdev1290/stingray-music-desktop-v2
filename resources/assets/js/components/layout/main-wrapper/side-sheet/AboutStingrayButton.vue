@@ -2,7 +2,7 @@
   <SideSheetButton
     v-koel-tooltip.left
     :title="shouldNotifyNewVersion ? 'New version available!' : `About ${appName}`"
-    @click.prevent="openAboutKoelModal"
+    @click.prevent="openAboutStingrayModal"
   >
     <Icon :icon="faInfoCircle" />
     <span
@@ -24,5 +24,5 @@ import SideSheetButton from '@/components/layout/main-wrapper/side-sheet/SideShe
 const { shouldNotifyNewVersion } = useNewVersionNotification()
 const { name: appName } = useBranding()
 
-const openAboutKoelModal = () => eventBus.emit('MODAL_SHOW_ABOUT_KOEL')
+const openAboutStingrayModal = () => eventBus.emit('MODAL_SHOW_ABOUT_KOEL')
 </script>
