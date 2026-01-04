@@ -25,7 +25,7 @@ This project provides a native desktop experience for Stingray Music on Windows 
 - **npm**, pnpm, or yarn (scripts assume npm)
 - **Windows 10+** or modern Linux desktop environment
 
-## �� Quick Start
+## Quick Start
 
 ### Clone and Install
 
