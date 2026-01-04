@@ -21,11 +21,23 @@ This project provides a native desktop experience for Stingray Music on Windows 
 
 ## 📋 System Requirements
 
+### General
+
 - **Node.js** 18 or higher
 - **npm**, pnpm, or yarn (scripts assume npm)
-- **Windows 10+** or modern Linux desktop environment
 
-## Quick Start
+### Windows
+
+- **Windows 10+** (64-bit recommended)
+- Build tools (Visual Studio Build Tools or similar for native modules)
+
+### Linux
+
+- **Modern Linux desktop environment** (Ubuntu 18.04+, Fedora 30+, etc.)
+- Development headers (`build-essential`, `libx11-dev`, etc.)
+- GTK 3.0+ libraries
+
+## 🚀 Quick Start
 
 ### Clone and Install
 
@@ -42,11 +54,146 @@ npm run dev       # Start Vite dev server + Electron
 npm run typecheck # Type check the code
 ```
 
-### Build Installers
+## �� Building & Deployment
+
+### Development Build
 
 ```bash
-npm run build     # Create distributable packages in release/
+npm run dev
 ```
+
+Runs the application in development mode with hot reload.
+
+### Production Build (All Platforms)
+
+```bash
+npm run build
+```
+
+This command:
+- Bundles the React frontend with Vite
+- Packages the Electron app
+- Generates platform-specific installers in `desktop/release/`
+
+### Platform-Specific Builds
+
+#### Windows Deployment
+
+**Prerequisites:**
+- Windows 10+ (64-bit)
+- Node.js 18+
+- Optional: Visual Studio Build Tools for native module compilation
+
+**Build Windows Installer:**
+
+```bash
+cd desktop
+npm install
+npm run build
+# Outputs: release/Stingray Music Desktop Setup *.exe (32-bit and 64-bit)
+```
+
+The Windows build generates:
+- `*.exe` – Installer executable
+- `*.msi` – MSI installer package (if configured)
+- Portable executable (optional)
+
+**Installation:**
+1. Download the installer from `release/`
+2. Run the `.exe` file
+3. Follow the installation wizard
+4. The app will be installed to `Program Files/Stingray Music Desktop` (or similar)
+
+**Portable Execution (Optional):**
+```bash
+cd release
+./Stingray\ Music\ Desktop.exe
+```
+
+#### Linux Deployment
+
+**Prerequisites:**
+- Modern Linux distribution (Ubuntu 18.04+, Fedora 30+, etc.)
+- Node.js 18+
+- Build tools: `build-essential`, `libx11-dev`, `libxrandr-dev`, `libxinerama-dev`, `libxcursor-dev`, `libxi-dev`
+
+**Install Build Dependencies (Ubuntu/Debian):**
+
+```bash
+sudo apt-get update
+sudo apt-get install -y \
+  build-essential \
+  libx11-dev \
+  libxrandr-dev \
+  libxinerama-dev \
+  libxcursor-dev \
+  libxi-dev \
+  libgtk-3-dev \
+  libdbus-1-dev
+```
+
+**Install Build Dependencies (Fedora/RHEL):**
+
+```bash
+sudo dnf install -y \
+  gcc \
+  gcc-c++ \
+  make \
+  libX11-devel \
+  libXrandr-devel \
+  libxinerama-devel \
+  libxcursor-devel \
+  libxi-devel \
+  gtk3-devel \
+  dbus-devel
+```
+
+**Build Linux Package:**
+
+```bash
+cd desktop
+npm install
+npm run build
+# Outputs: release/Stingray\ Music\ Desktop-*.AppImage
+#          release/Stingray\ Music\ Desktop-*.snap (if configured)
+#          release/*.deb or *.rpm (if configured)
+```
+
+The Linux build generates:
+- **AppImage** – Portable Linux executable (recommended)
+- **DEB** – Debian/Ubuntu installer package
+- **RPM** – Fedora/RHEL installer package
+- **Snap** – Snap package (if configured)
+
+**Installation Options:**
+
+*Option 1: AppImage (No Installation Required)*
+```bash
+chmod +x Stingray\ Music\ Desktop-*.AppImage
+./Stingray\ Music\ Desktop-*.AppImage
+```
+
+*Option 2: DEB Package*
+```bash
+sudo dpkg -i Stingray\ Music\ Desktop-*.deb
+# Or double-click in your file manager to install
+```
+
+*Option 3: RPM Package*
+```bash
+sudo rpm -i Stingray\ Music\ Desktop-*.rpm
+```
+
+## 📦 Build Configuration
+
+Build settings are configured in:
+- `desktop/electron-builder.config.cjs` – Electron Builder configuration
+- `desktop/vite.config.ts` – Vite bundler configuration
+- `desktop/package.json` – Build scripts and dependencies
+
+To customize the build output:
+1. Edit `electron-builder.config.cjs` to change installer settings, signing, notarization, etc.
+2. Run `npm run build` to regenerate packages
 
 ## 📁 Project Structure
 
@@ -55,6 +202,8 @@ stingray-music-desktop-v2/
 ├── desktop/                          # Electron + React application
 │   ├── main.js                       # Electron main process entry
 │   ├── preload.js                    # Secure IPC bridge
+│   ├── electron-builder.config.cjs   # Build configuration
+│   ├── vite.config.ts                # Frontend bundler config
 │   ├── src/
 │   │   ├── renderer/
 │   │   │   ├── App.tsx               # Root React component + theme picker
@@ -62,7 +211,8 @@ stingray-music-desktop-v2/
 │   │   │   ├── theme/                # Theme configuration and types
 │   │   │   └── styles.css            # Global styles
 │   │   └── ...
-│   └── public/themes/                # Theme images and thumbnails
+│   ├── public/themes/                # Theme images and thumbnails
+│   └── release/                      # Build output (after running build)
 ├── resources/assets/                 # Shared legacy assets
 ├── public/                           # Web artifacts (legacy, may be pruned)
 └── docs/                             # Documentation
