@@ -1,32 +1,13 @@
 /// <reference types="vitest" />
 import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
-import laravel from 'laravel-vite-plugin'
 import path from 'path'
-import { visualizer } from 'rollup-plugin-visualizer'
 
+// This is a legacy configuration file. The actual application build
+// is located in the desktop/ directory. See desktop/vite.config.ts
+// for the active Vite configuration.
 export default defineConfig({
-  plugins: [
-    vue(),
-    laravel({
-      input: [
-        'resources/assets/js/app.ts',
-        'resources/assets/js/remote/app.ts'
-      ],
-      refresh: true
-    }),
-    visualizer({
-      filename: 'stats.html'
-    })
-  ],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './resources/assets/js'),
-      '@modules': path.resolve(__dirname, './node_modules')
-    }
-  },
+  plugins: [],
   test: {
-    environment: 'jsdom',
-    setupFiles: path.resolve(__dirname, './resources/assets/js/__tests__/setup.ts')
+    environment: 'jsdom'
   }
 })
