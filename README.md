@@ -7,7 +7,7 @@ A desktop music streaming client application built with Vue.js and Laravel, desi
 
 ## Introduction
 
-**Stingray Music Desktop Client** is a modern desktop application for streaming and managing your music library. Built with Vue.js on the frontend and Laravel on the backend, this application provides a seamless music streaming experience across Windows and Linux platforms.
+**Stingray Music Desktop Client** is a modern desktop application for streaming and managing your music library. Built wit, this application provides a seamless music streaming experience across Windows and Linux platforms.
 
 ## Features
 
@@ -16,11 +16,9 @@ A desktop music streaming client application built with Vue.js and Laravel, desi
 - 🎨 Modern, responsive user interface
 - 🔐 User authentication and profiles
 - 📻 Radio station support
-- 🎙️ Podcast support
 - 🎨 Customizable themes
 - 🔍 Advanced search functionality
-- 📱 Remote control support
-- ☁️ Cloud storage integration (local, SFTP, S3, Dropbox)
+
 
 ## Screenshots
 
