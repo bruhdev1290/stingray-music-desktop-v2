@@ -1,91 +1,122 @@
-# Stingray Music Desktop Client (Electron + React)
+# Stingray Music Desktop Client
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-lightgrey.svg)
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-brightgreen.svg)
+![Build](https://img.shields.io/badge/build-Electron%20%2B%20React-blue.svg)
 
-A cross-platform desktop client (Electron + React + TypeScript) that talks directly to the Stingray Music API. The legacy Laravel/Vue backend has been removed; only shared UI/theme assets remain.
+A modern cross-platform desktop client built with **Electron**, **React**, and **TypeScript** that integrates with the Stingray Music API. The legacy Laravel/Vue backend has been removed, leaving a clean, focused Electron application with preserved theme assets.
 
-## Introduction
+## 🎯 Overview
 
-This repo now focuses solely on the Electron/React desktop app. It will authenticate against the Stingray Music API, fetch catalog/search data, and play streams natively on Windows and Linux. Theme assets from the legacy UI are preserved and applied via CSS variables.
+This project provides a native desktop experience for Stingray Music on Windows and Linux. It authenticates against the Stingray Music API, manages your music library, and supports streaming with a beautiful, customizable interface powered by preserved theme assets.
 
-## Features (current and planned)
+## ✨ Features
 
-- 🎵 Streaming playback via Stingray API streams
-- 🎨 Theme selector using preserved Stingray/Koel visual assets
-- 🔐 Token-based auth against Stingray API (stub in code; wire real flow)
-- ⌨️ Media keys, tray controls, now-playing metadata (to be added)
-- 🔍 Browse/search catalog (to be added)
-- ⬇️ Optional offline cache (future)
+- **🎵 Streaming Playback** – Play streams directly from the Stingray Music API
+- **🎨 Theme Selector** – Choose from multiple themes using preserved visual assets
+- **🔐 Secure Authentication** – Token-based auth against Stingray API (implementation in progress)
+- **⌨️ Keyboard Controls** – Media keys, tray integration, and now-playing metadata (planned)
+- **🔍 Search & Browse** – Discover and search your music catalog (planned)
+- **⬇️ Offline Cache** – Optional offline playback support (future)
 
-## System Requirements
+## 📋 System Requirements
 
-- Node.js 18+
-- npm (or pnpm/yarn if you prefer; scripts assume npm)
-- Windows 10+ or modern Linux desktop
+- **Node.js** 18 or higher
+- **npm**, pnpm, or yarn (scripts assume npm)
+- **Windows 10+** or modern Linux desktop environment
 
-## Getting Started (Electron app)
+## �� Quick Start
+
+### Clone and Install
 
 ```bash
 git clone https://github.com/bruhdev1290/stingray-music-desktop-v2.git
 cd stingray-music-desktop-v2/desktop
 npm install
-npm run dev   # runs Vite + Electron
 ```
 
-Build installers:
+### Development
 
 ```bash
-npm run build   # outputs to release/
+npm run dev       # Start Vite dev server + Electron
+npm run typecheck # Type check the code
 ```
 
-## Project Structure (after Laravel removal)
+### Build Installers
+
+```bash
+npm run build     # Create distributable packages in release/
+```
+
+## 📁 Project Structure
 
 ```
 stingray-music-desktop-v2/
-├── desktop/                   # Electron + React app (source lives here)
-│   ├── main.js                # Electron entry
-│   ├── preload.js             # Secure bridge
-│   ├── src/renderer/          # React renderer (Vite, TS)
-│   │   ├── App.tsx            # UI shell + theme picker
-│   │   ├── api/stingrayClient.ts
-│   │   └── theme/             # Theme catalog and types
-│   └── public/themes/         # Preserved theme images/thumbnails
-├── resources/assets/img/      # Legacy images kept for reuse
-├── public/                    # Legacy web artifacts (may be pruned later)
-└── docs/                      # Documentation
+├── desktop/                          # Electron + React application
+│   ├── main.js                       # Electron main process entry
+│   ├── preload.js                    # Secure IPC bridge
+│   ├── src/
+│   │   ├── renderer/
+│   │   │   ├── App.tsx               # Root React component + theme picker
+│   │   │   ├── api/                  # API client integration
+│   │   │   ├── theme/                # Theme configuration and types
+│   │   │   └── styles.css            # Global styles
+│   │   └── ...
+│   └── public/themes/                # Theme images and thumbnails
+├── resources/assets/                 # Shared legacy assets
+├── public/                           # Web artifacts (legacy, may be pruned)
+└── docs/                             # Documentation
 ```
 
-## Theme Assets
+## 🎨 Theme Assets
 
-- Preserved backgrounds/thumbnails live in `desktop/public/themes` and `desktop/public/themes/thumbnails`.
-- The theme catalog is defined in `desktop/src/renderer/theme/themes.ts` and applied via CSS variables.
+- Theme images and thumbnails are located in `desktop/public/themes/` and `desktop/public/themes/thumbnails/`
+- Theme definitions are in `desktop/src/renderer/theme/themes.ts`
+- Themes are applied dynamically via CSS variables
 
-## Development
+## 🔧 Development Guide
+
+### API Integration
+
+The Stingray API client stub is located at `desktop/src/renderer/api/stingrayClient.ts`. You'll need to implement:
+
+- Real authentication flow
+- Catalog and search endpoints
+- Playback URL retrieval
+- Token refresh logic
+- Secure token storage (using OS keyring)
+
+### Type Checking
 
 ```bash
-cd desktop
-npm run dev      # Vite + Electron
-npm run build    # package app
 npm run typecheck
 ```
 
-## Stingray API Integration
+### Project Standards
 
-- The API client stub is in `desktop/src/renderer/api/stingrayClient.ts`. Implement real auth, catalog, search, playback URL retrieval, and token refresh here.
-- Store tokens securely (e.g., OS keyring) before shipping.
+- Use TypeScript for all new code
+- Follow existing code conventions
+- Check existing components before creating new ones
 
-## Contributing
+## 🤝 Contributing
 
-1. Fork and branch (`git checkout -b feature/your-feature`).
-2. Update code and docs.
-3. Run checks (`npm run typecheck`, optionally add tests when available).
-4. Open a PR.
+We welcome contributions! Here's how to get started:
 
-## License
+1. **Fork** the repository
+2. **Create** a feature branch: `git checkout -b feature/your-feature`
+3. **Make** your changes and update documentation
+4. **Test** your changes: `npm run typecheck`
+5. **Commit** with clear messages
+6. **Push** to your fork and **open a PR**
 
-MIT. See [LICENSE.md](LICENSE.md).
+## 📄 License
 
-## Support
+MIT License – See [LICENSE.md](LICENSE.md) for details.
 
-Open an [issue](https://github.com/bruhdev1290/stingray-music-desktop-v2/issues) with details about your environment and steps to reproduce.
+## 💬 Support
+
+Found a bug or have a question? Please [open an issue](https://github.com/bruhdev1290/stingray-music-desktop-v2/issues) with:
+
+- Your environment details (OS, Node version)
+- Steps to reproduce the issue
+- Expected vs. actual behavior
