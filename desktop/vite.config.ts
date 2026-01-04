@@ -9,6 +9,7 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'src')
     }
   },
+  base: process.env.VITE_DEV_SERVER_URL ? '/' : './',
   build: {
     outDir: 'dist',
     emptyOutDir: true
