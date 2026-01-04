@@ -96,7 +96,7 @@
     "test:unit": "vitest",
     "test:e2e": "kill-port 8080 && start-test dev http-get://localhost:8080/api/ping 'cypress open'",
     "test:e2e:ci": "kill-port 8080 && start-test 'php artisan serve --port=8080 --quiet' http-get://localhost:8080/api/ping 'cypress run --browser chromium'",
-    "build": "vite build",
+    "build": "cd desktop && npm install && npm run build",
     "dev": "node -e \"console.warn('Command \\\"pnpm dev\\\" has been removed. Use \\\"composer dev\\\" instead.')\"",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",

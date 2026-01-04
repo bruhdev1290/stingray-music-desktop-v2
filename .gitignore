@@ -91,6 +91,10 @@ log.json
 docs/.vitepress/dist
 docs/.vitepress/cache
 
+### Desktop App Build Artifacts ###
+desktop/release
+desktop/dist
+
 demo-credits.json
 
 public/sandbox
