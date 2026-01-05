@@ -170,13 +170,14 @@ export default function App(): JSX.Element {
       setStatus('authenticated');
     } catch (error) {
       setAuthStatus('error');
-      setMessage(error instanceof Error ? error.message : 'Login failed');
+      const errorMsg = error instanceof Error ? error.message : 'Login failed';
+      setMessage(errorMsg.includes('401') || errorMsg.includes('invalid') ? 'Invalid username or password' : errorMsg);
     }
   };
 
   const onWebPlayerLogin = async (): Promise<void> => {
     setAuthStatus('logging-in');
-    setMessage('Opening web player authentication...');
+    setMessage('Opening web player authentication window...');
 
     try {
       const session = await webPlayerClient.openAuthWindow();
@@ -187,11 +188,12 @@ export default function App(): JSX.Element {
         setMessage('Successfully logged in via Web Player');
         setStatus('authenticated');
       } else {
-        throw new Error('Authentication failed');
+        throw new Error('Authentication was not completed. Please try again.');
       }
     } catch (error) {
       setAuthStatus('error');
-      setMessage(error instanceof Error ? error.message : 'Web player login failed');
+      const errorMsg = error instanceof Error ? error.message : 'Web player login failed';
+      setMessage(errorMsg);
     }
   };
 
@@ -289,7 +291,7 @@ export default function App(): JSX.Element {
             <div className="card stack">
               <h3 style={{ margin: 0 }}>Login via Web Player</h3>
               <p className="muted" style={{ margin: '8px 0', fontSize: '0.9em' }}>
-                Skip the API and authenticate directly through the Stingray web player. Your browser will open to handle login.
+                A new window will open where you can log in with your Stingray account. Select your operator and complete the login process.
               </p>
               <button
                 onClick={onWebPlayerLogin}
@@ -299,8 +301,11 @@ export default function App(): JSX.Element {
                   backgroundColor: '#1e88e5'
                 }}
               >
-                {authStatus === 'logging-in' ? 'Opening Web Player…' : '🌐 Login with Web Player'}
+                {authStatus === 'logging-in' ? 'Opening Web Player…' : '🌐 Open Web Player Login'}
               </button>
+              {authStatus === 'error' && message.includes('Web player') && (
+                <p style={{ color: '#ff6b6b', margin: '8px 0', fontSize: '0.9em' }}>{message}</p>
+              )}
             </div>
           </>
         ) : (
@@ -320,23 +325,25 @@ export default function App(): JSX.Element {
           </div>
         )}
 
-        <div className="card stack">
-          <h3 style={{ margin: 0 }}>Playback Controls</h3>
-          <div className="muted" style={{ lineHeight: 1.5, marginBottom: 12 }}>
-            <div>Status: {playbackState.isPlaying ? 'Playing' : 'Stopped'}</div>
-            <div>
-              Progress: {playbackState.progress.toFixed(1)}s / {playbackState.duration.toFixed(1)}s
+        {authStatus === 'authenticated' && (
+          <div className="card stack">
+            <h3 style={{ margin: 0 }}>Playback Controls</h3>
+            <div className="muted" style={{ lineHeight: 1.5, marginBottom: 12 }}>
+              <div>Status: {playbackState.isPlaying ? 'Playing' : 'Stopped'}</div>
+              <div>
+                Progress: {playbackState.progress.toFixed(1)}s / {playbackState.duration.toFixed(1)}s
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={() => playbackRef.current?.previous()}>⏮ Previous</button>
+              <button onClick={() => playbackRef.current?.togglePlayPause()}>
+                {playbackState.isPlaying ? '⏸ Pause' : '▶ Play'}
+              </button>
+              <button onClick={() => playbackRef.current?.next()}>⏭ Next</button>
+              <button onClick={() => playbackRef.current?.stop()}>⏹ Stop</button>
             </div>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button onClick={() => playbackRef.current?.previous()}>⏮ Previous</button>
-            <button onClick={() => playbackRef.current?.togglePlayPause()}>
-              {playbackState.isPlaying ? '⏸ Pause' : '▶ Play'}
-            </button>
-            <button onClick={() => playbackRef.current?.next()}>⏭ Next</button>
-            <button onClick={() => playbackRef.current?.stop()}>⏹ Stop</button>
-          </div>
-        </div>
+        )}
 
         <div className="card stack">
           <h3 style={{ margin: 0 }}>Implementation Status</h3>

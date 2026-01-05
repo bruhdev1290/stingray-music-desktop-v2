@@ -78,16 +78,32 @@ export class WebPlayerClient {
       // Create authentication URL with callback
       const authUrl = `${this.baseUrl}/login?redirect=${encodeURIComponent(window.location.href)}`;
 
-      // Open in new window/tab
-      const authWindow = window.open(authUrl, 'WebPlayerAuth', 'width=800,height=600');
+      // Open in new window/tab with centered positioning
+      const screenWidth = window.screen.width;
+      const screenHeight = window.screen.height;
+      const width = 900;
+      const height = 700;
+      const left = (screenWidth - width) / 2;
+      const top = (screenHeight - height) / 2;
+
+      const authWindow = window.open(
+        authUrl,
+        'WebPlayerAuth',
+        `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
+      );
 
       if (!authWindow) {
-        reject(new Error('Failed to open authentication window'));
+        reject(new Error('Failed to open authentication window. Please check if pop-ups are blocked in your browser.'));
         return;
       }
 
+      let checkCount = 0;
+      const maxChecks = 300; // 5 minutes with 1-second intervals
+
       // Poll for authentication completion
       const checkAuth = setInterval(async () => {
+        checkCount++;
+
         try {
           // Check if user is authenticated by trying to fetch user data
           const userResponse = await fetch(`${this.baseUrl}/api/user`, {
@@ -108,14 +124,20 @@ export class WebPlayerClient {
         } catch (error) {
           // Still waiting for auth
         }
-      }, 1000);
 
-      // Timeout after 5 minutes
-      setTimeout(() => {
-        clearInterval(checkAuth);
-        authWindow.close();
-        reject(new Error('Authentication timeout'));
-      }, 5 * 60 * 1000);
+        // Check if window was closed by user
+        if (authWindow.closed) {
+          clearInterval(checkAuth);
+          reject(new Error('Authentication window was closed. Please try again.'));
+        }
+
+        // Timeout after max checks
+        if (checkCount >= maxChecks) {
+          clearInterval(checkAuth);
+          authWindow.close();
+          reject(new Error('Authentication took too long. Please check your internet connection and try again.'));
+        }
+      }, 1000);
     });
   }
 
