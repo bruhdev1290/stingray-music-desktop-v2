@@ -50,6 +50,21 @@ function createWindow() {
       mainWindow.hide();
     }
   });
+
+  // Handle window.open for web player authentication
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith('https://webplayer.stingray.com/')) {
+      return {
+        action: 'allow',
+        overrideBrowserWindowOptions: {
+          webPreferences: {
+            session: mainWindow.webContents.session
+          }
+        }
+      };
+    }
+    return { action: 'deny' };
+  });
 }
 
 function createTray() {
