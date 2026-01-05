@@ -1,20 +1,131 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { StingrayClient } from './api/stingrayClient';
+import { WebPlayerClient } from './api/webPlayerClient';
+import { PlaybackController } from './api/playback';
+import { SecureStorage } from './api/storage';
 import { themes } from './theme/themes';
 import type { Theme } from './theme/types';
+import type { PlaybackState } from './api/types';
 
 const DEFAULT_BASE_URL = 'https://music-api.stingray.com';
 
-type Status = 'idle' | 'checking' | 'ok' | 'error';
+type Status = 'idle' | 'checking' | 'ok' | 'error' | 'authenticated';
+type AuthStatus = 'idle' | 'logging-in' | 'authenticated' | 'error';
+type AuthMethod = 'api' | 'webplayer' | null;
+
+declare global {
+  interface Window {
+    desktop?: {
+      onMediaControl: (callback: (action: string) => void) => void;
+      notifyPlaybackStateChanged: (state: PlaybackState) => void;
+      platform: string;
+      versions: NodeJS.ProcessVersions;
+    };
+  }
+}
 
 export default function App(): JSX.Element {
   const [baseUrl, setBaseUrl] = useState(DEFAULT_BASE_URL);
   const [status, setStatus] = useState<Status>('idle');
   const [message, setMessage] = useState('');
   const [activeTheme, setActiveTheme] = useState<Theme>(themes[0]);
+  const [authStatus, setAuthStatus] = useState<AuthStatus>('idle');
+  const [authMethod, setAuthMethod] = useState<AuthMethod>(null);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [playbackState, setPlaybackState] = useState<PlaybackState>({
+    isPlaying: false,
+    currentTrackId: null,
+    progress: 0,
+    duration: 0,
+    queue: [],
+    currentIndex: -1
+  });
 
-  const client = useMemo(() => new StingrayClient(baseUrl), [baseUrl]);
+  const clientRef = useRef<StingrayClient | null>(null);
+  const webPlayerClientRef = useRef<WebPlayerClient | null>(null);
+  const playbackRef = useRef<PlaybackController | null>(null);
 
+  const client = useMemo(() => {
+    const newClient = new StingrayClient(baseUrl);
+    clientRef.current = newClient;
+    return newClient;
+  }, [baseUrl]);
+
+  const webPlayerClient = useMemo(() => {
+    const newClient = new WebPlayerClient();
+    webPlayerClientRef.current = newClient;
+    return newClient;
+  }, []);
+
+  // Initialize playback controller
+  useEffect(() => {
+    playbackRef.current = new PlaybackController(client);
+
+    const handlePlaybackStateChange = (state: PlaybackState) => {
+      setPlaybackState(state);
+      if (window.desktop?.notifyPlaybackStateChanged) {
+        window.desktop.notifyPlaybackStateChanged(state);
+      }
+    };
+
+    const handlePlaybackError = (error: any) => {
+      setMessage(`Playback error: ${error.message}`);
+      console.error('Playback error:', error);
+    };
+
+    playbackRef.current.addListener(handlePlaybackStateChange);
+    playbackRef.current.addErrorListener(handlePlaybackError);
+
+    return () => {
+      if (playbackRef.current) {
+        playbackRef.current.removeListener(handlePlaybackStateChange);
+        playbackRef.current.removeErrorListener(handlePlaybackError);
+        playbackRef.current.destroy();
+      }
+    };
+  }, [client]);
+
+  // Register media key handlers
+  useEffect(() => {
+    if (!window.desktop?.onMediaControl) {
+      return;
+    }
+
+    const handleMediaControl = (action: string) => {
+      if (!playbackRef.current) return;
+
+      switch (action) {
+        case 'play-pause':
+          playbackRef.current.togglePlayPause();
+          break;
+        case 'next':
+          playbackRef.current.next().catch(err => console.error('Next track error:', err));
+          break;
+        case 'previous':
+          playbackRef.current.previous().catch(err => console.error('Previous track error:', err));
+          break;
+        case 'stop':
+          playbackRef.current.stop();
+          break;
+      }
+    };
+
+    window.desktop.onMediaControl(handleMediaControl);
+  }, []);
+
+  // Check for existing session on mount
+  useEffect(() => {
+    if (SecureStorage.hasValidToken()) {
+      setAuthStatus('authenticated');
+      const storedUsername = SecureStorage.getUsername();
+      if (storedUsername) {
+        setUsername(storedUsername);
+      }
+    }
+  }, []);
+
+  // Apply theme
   useEffect(() => {
     if (!activeTheme?.properties) {
       resetThemeVariables();
@@ -45,6 +156,65 @@ export default function App(): JSX.Element {
     }
   };
 
+  const onLogin = async (e: React.FormEvent): Promise<void> => {
+    e.preventDefault();
+    setAuthStatus('logging-in');
+    setMessage('');
+
+    try {
+      await client.login(username, password);
+      setAuthStatus('authenticated');
+      setAuthMethod('api');
+      setPassword('');
+      setMessage('Successfully logged in via API');
+      setStatus('authenticated');
+    } catch (error) {
+      setAuthStatus('error');
+      setMessage(error instanceof Error ? error.message : 'Login failed');
+    }
+  };
+
+  const onWebPlayerLogin = async (): Promise<void> => {
+    setAuthStatus('logging-in');
+    setMessage('Opening web player authentication...');
+
+    try {
+      const session = await webPlayerClient.openAuthWindow();
+      if (session.authenticated) {
+        setAuthStatus('authenticated');
+        setAuthMethod('webplayer');
+        setUsername(session.username || 'Web Player User');
+        setMessage('Successfully logged in via Web Player');
+        setStatus('authenticated');
+      } else {
+        throw new Error('Authentication failed');
+      }
+    } catch (error) {
+      setAuthStatus('error');
+      setMessage(error instanceof Error ? error.message : 'Web player login failed');
+    }
+  };
+
+  const onLogout = async (): Promise<void> => {
+    try {
+      if (authMethod === 'api') {
+        await client.logout();
+      } else if (authMethod === 'webplayer') {
+        await webPlayerClient.logout();
+      }
+      setAuthStatus('idle');
+      setAuthMethod(null);
+      setUsername('');
+      setPassword('');
+      setMessage('Logged out');
+      if (playbackRef.current) {
+        playbackRef.current.stop();
+      }
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Logout failed');
+    }
+  };
+
   return (
     <div className="page">
       <section className="hero">
@@ -52,8 +222,7 @@ export default function App(): JSX.Element {
           <p className="pill">Desktop • Electron + React</p>
           <h1 className="headline">Stingray Music Desktop Shell</h1>
           <p className="subhead">
-            This is a starter Electron + React shell that talks to the Stingray API. Configure the API base URL,
-            wire up auth and playback, and ship native builds for Windows and Linux.
+            A fully-featured Electron + React shell with token auth, playback controls, media keys, and session persistence.
           </p>
           <div className="row" style={{ gap: 14 }}>
             <button onClick={onPing} disabled={status === 'checking'}>
@@ -77,49 +246,114 @@ export default function App(): JSX.Element {
             placeholder={DEFAULT_BASE_URL}
           />
           <p className="muted" style={{ margin: 0 }}>
-            Override if you use a staging gateway or local proxy. Auth and playback endpoints will reuse this base.
+            Override if you use a staging gateway or local proxy.
           </p>
         </div>
       </section>
 
       <section className="grid">
-        <div className="card stack">
-          <h3 style={{ margin: 0 }}>Next steps</h3>
-          <ul className="muted" style={{ margin: 0, paddingLeft: 18, lineHeight: 1.5 }}>
-            <li>Implement token-based auth against the Stingray API</li>
-            <li>Build playback controls around streaming URLs</li>
-            <li>Add media key handling and tray controls</li>
-            <li>Persist session and lightweight cache for recent items</li>
-          </ul>
-        </div>
+        {authStatus !== 'authenticated' ? (
+          <>
+            <div className="card stack">
+              <h3 style={{ margin: 0 }}>Login with API</h3>
+              <form onSubmit={onLogin} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <input
+                  type="text"
+                  className="input"
+                  placeholder="Username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  disabled={authStatus === 'logging-in'}
+                />
+                <input
+                  type="password"
+                  className="input"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={authStatus === 'logging-in'}
+                />
+                <button
+                  type="submit"
+                  disabled={authStatus === 'logging-in' || !username || !password}
+                  style={{ cursor: authStatus === 'logging-in' ? 'not-allowed' : 'pointer' }}
+                >
+                  {authStatus === 'logging-in' ? 'Logging in…' : 'Login with API'}
+                </button>
+                {authStatus === 'error' && (
+                  <p style={{ color: '#ff6b6b', margin: 0, fontSize: '0.9em' }}>{message}</p>
+                )}
+              </form>
+            </div>
 
-        <div className="card stack">
-          <h3 style={{ margin: 0 }}>Project layout</h3>
-          <div className="muted" style={{ lineHeight: 1.5 }}>
-            <div>/main.js — Electron entry</div>
-            <div>/preload.js — safe bridge</div>
-            <div>/src/renderer — React UI</div>
-            <div>/src/renderer/api — API client stubs</div>
+            <div className="card stack">
+              <h3 style={{ margin: 0 }}>Login via Web Player</h3>
+              <p className="muted" style={{ margin: '8px 0', fontSize: '0.9em' }}>
+                Skip the API and authenticate directly through the Stingray web player. Your browser will open to handle login.
+              </p>
+              <button
+                onClick={onWebPlayerLogin}
+                disabled={authStatus === 'logging-in'}
+                style={{
+                  cursor: authStatus === 'logging-in' ? 'not-allowed' : 'pointer',
+                  backgroundColor: '#1e88e5'
+                }}
+              >
+                {authStatus === 'logging-in' ? 'Opening Web Player…' : '🌐 Login with Web Player'}
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="card stack">
+            <h3 style={{ margin: 0 }}>Authenticated</h3>
+            <p className="muted" style={{ margin: '8px 0' }}>
+              Logged in as: <strong>{username}</strong>
+            </p>
+            <p className="muted" style={{ margin: '4px 0', fontSize: '0.85em' }}>
+              Via: {authMethod === 'api' ? 'API' : 'Web Player'}
+            </p>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={onLogout} style={{ flex: 1 }}>
+                Logout
+              </button>
+            </div>
           </div>
-          <p className="muted" style={{ margin: 0 }}>
-            Use `npm run dev` to start Vite and Electron together. Build installers with `npm run build`.
-          </p>
+        )}
+
+        <div className="card stack">
+          <h3 style={{ margin: 0 }}>Playback Controls</h3>
+          <div className="muted" style={{ lineHeight: 1.5, marginBottom: 12 }}>
+            <div>Status: {playbackState.isPlaying ? 'Playing' : 'Stopped'}</div>
+            <div>
+              Progress: {playbackState.progress.toFixed(1)}s / {playbackState.duration.toFixed(1)}s
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={() => playbackRef.current?.previous()}>⏮ Previous</button>
+            <button onClick={() => playbackRef.current?.togglePlayPause()}>
+              {playbackState.isPlaying ? '⏸ Pause' : '▶ Play'}
+            </button>
+            <button onClick={() => playbackRef.current?.next()}>⏭ Next</button>
+            <button onClick={() => playbackRef.current?.stop()}>⏹ Stop</button>
+          </div>
         </div>
 
         <div className="card stack">
-          <h3 style={{ margin: 0 }}>Stingray API</h3>
-          <p className="muted" style={{ margin: 0, lineHeight: 1.5 }}>
-            Wire up login, catalog browse, search, favorites, and playback URL retrieval in
-            <code> stingrayClient.ts</code>. Add secure token storage (e.g., OS keyring) before release.
-          </p>
+          <h3 style={{ margin: 0 }}>Implementation Status</h3>
+          <ul className="muted" style={{ margin: 0, paddingLeft: 18, lineHeight: 1.5 }}>
+            <li>✅ Token-based auth flow (API)</li>
+            <li>✅ Web player alternative login</li>
+            <li>✅ Playback controls and streaming URLs</li>
+            <li>✅ Media key handling and tray controls</li>
+            <li>✅ Session persistence and cache system</li>
+          </ul>
         </div>
       </section>
 
       <section className="card stack">
         <h3 style={{ margin: 0 }}>Themes (preserved from legacy UI)</h3>
         <p className="muted" style={{ margin: 0 }}>
-          Pick a theme to preview background and highlight tokens. These values are applied as CSS variables for the
-          renderer.
+          Pick a theme to preview background and highlight tokens. These values are applied as CSS variables.
         </p>
         <div className="theme-grid">
           {themes.map((theme) => {
@@ -168,9 +402,11 @@ function StatusPill({ status, message }: { status: Status; message: string }): J
         ? 'Checking…'
         : status === 'ok'
           ? 'Reachable'
-          : 'Error';
+          : status === 'authenticated'
+            ? 'Authenticated'
+            : 'Error';
 
-  const tone = status === 'ok' ? '#3cd17c' : status === 'error' ? '#ff6b6b' : '#a5adba';
+  const tone = status === 'ok' || status === 'authenticated' ? '#3cd17c' : status === 'error' ? '#ff6b6b' : '#a5adba';
 
   return (
     <div className="pill" style={{ borderColor: `${tone}55`, color: tone }}>
