@@ -11,10 +11,15 @@ export default defineConfig({
       apply: 'build',
       enforce: 'post',
       async generateBundle() {
-        const themesDir = path.resolve(__dirname, '../resources/assets/img/themes');
+        const themesDir = path.resolve(__dirname, '../img/themes');
         const publicThemesDir = path.resolve(__dirname, 'public/themes');
 
         if (fs.existsSync(themesDir)) {
+          // Create public/themes directory if it doesn't exist
+          if (!fs.existsSync(publicThemesDir)) {
+            fs.mkdirSync(publicThemesDir, { recursive: true });
+          }
+
           // Copy all theme images from resources to public/themes
           const files = fs.readdirSync(themesDir);
           files.forEach((file) => {
@@ -44,6 +49,7 @@ export default defineConfig({
     }
   },
   base: process.env.VITE_DEV_SERVER_URL ? '/' : './',
+  publicDir: 'public',
   build: {
     outDir: 'dist',
     emptyOutDir: true
