@@ -1,9 +1,43 @@
 import path from 'path';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import fs from 'fs';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    {
+      name: 'copy-themes',
+      apply: 'build',
+      enforce: 'post',
+      async generateBundle() {
+        const themesDir = path.resolve(__dirname, '../resources/assets/img/themes');
+        const publicThemesDir = path.resolve(__dirname, 'public/themes');
+
+        if (fs.existsSync(themesDir)) {
+          // Copy all theme images from resources to public/themes
+          const files = fs.readdirSync(themesDir);
+          files.forEach((file) => {
+            const src = path.join(themesDir, file);
+            const dest = path.join(publicThemesDir, file);
+            const stat = fs.statSync(src);
+
+            if (stat.isDirectory()) {
+              if (!fs.existsSync(dest)) {
+                fs.mkdirSync(dest, { recursive: true });
+              }
+              const subfiles = fs.readdirSync(src);
+              subfiles.forEach((subfile) => {
+                fs.copyFileSync(path.join(src, subfile), path.join(dest, subfile));
+              });
+            } else {
+              fs.copyFileSync(src, dest);
+            }
+          });
+        }
+      }
+    }
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src')
